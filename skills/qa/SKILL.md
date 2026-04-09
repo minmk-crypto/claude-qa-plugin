@@ -1,7 +1,7 @@
 ---
 name: qa
 description: "Web QA 자동화. Figma/PRD를 기반으로 TC 생성 → Playwright로 실제 사이트 검증 → 리포트 → Jira 티켓까지 한 번에 실행."
-allowed-tools: Bash Read Write Grep Glob Agent
+allowed-tools: Bash Read Write Grep Glob Agent mcp__playwright__browser_navigate mcp__playwright__browser_snapshot mcp__playwright__browser_take_screenshot mcp__playwright__browser_resize mcp__playwright__browser_click mcp__playwright__browser_type mcp__playwright__browser_evaluate mcp__playwright__browser_press_key mcp__playwright__browser_hover mcp__playwright__browser_wait_for mcp__playwright__browser_close
 argument-hint: "[url]"
 ---
 
@@ -115,15 +115,32 @@ TC 초안을 보여주고 승인받은 후 Phase 4.
 
 ## Phase 4: Playwright 검증
 
+**진행 상황 표시:** 각 상품/해상도 전환 시, 그리고 TC 그룹(매우높음/높음/보통) 시작 시 대화에 진행 상황을 출력한다.
+```
+예시:
+📱 모바일 (390px) — peach-glow-makeup-base
+  [매우높음] TC-A01~A09 검증 중...
+  ✓ 9/9 PASS
+  [높음] TC-B01~B36 검증 중...
+  ✓ 25 PASS, ✗ 2 FAIL
+  ...
+📱 태블릿 (768px) — peach-glow-makeup-base
+  ...
+```
+
+**실행:**
 ```
 for each viewport in [390, 768, 1280]:
   browser_resize(viewport)
+  대화에 "📱 {뷰포트} 검증 시작" 출력
   for each url in urls:
     browser_navigate(url)
+    대화에 "  {상품명} 검증 중..." 출력
     // 정적: browser_evaluate (DOM 검증)
     // 인터랙션: browser_click/type
     // 디자인: getComputedStyle
     // FAIL → browser_take_screenshot
+    대화에 "  ✓ N PASS, ✗ N FAIL" 출력
 ```
 
 결과를 JSON으로 저장: `output/reports/YYYY-MM-DD-qa-results.json`
