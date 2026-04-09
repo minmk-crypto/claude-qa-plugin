@@ -160,18 +160,42 @@ for each viewport in [390, 768, 1280]:
 
 ## Phase 5: 리포트
 
-### 5-1. 엑셀
-`output/reports/YYYY-MM-DD-qa-{페이지명}.xlsx`
-- TC 목록 + URL×해상도 결과 매트릭스
-- 셀 색상: PASS(초록), FAIL(빨강), SKIP(파랑), N/A(회색)
-- 비고 컬럼: FAIL 상세
+Phase 4에서 수집한 결과를 JSON으로 저장한 뒤, 스크립트로 리포트를 생성한다.
 
-### 5-2. md 리포트
-`output/reports/YYYY-MM-DD-qa-{페이지명}.md`
-- 요약 + FAIL 목록 + 발견사항
+### 5-1. 결과 JSON 저장
+Phase 4 결과를 `output/reports/YYYY-MM-DD-qa-{페이지명}-results.json`에 저장.
+형식은 [scripts/generate-report.py](scripts/generate-report.py) 상단 docstring 참조.
+
+### 5-2. 리포트 생성 (엑셀 + md)
+```bash
+python3 scripts/generate-report.py \
+  --input output/reports/YYYY-MM-DD-qa-{페이지명}-results.json \
+  --output-dir output/reports \
+  --name {페이지명}
+```
+→ 엑셀 (.xlsx) + md 리포트 자동 생성.
+→ 엑셀: TC 목록 + URL×해상도 결과 매트릭스 + 셀 색상(PASS 초록/FAIL 빨강) + 비고
+→ md: 요약 + FAIL 목록 + 스크린샷 링크
 
 ### 5-3. 대화 출력
-FAIL 요약 테이블. 매우높음/높음 강조.
+FAIL 건 요약을 대화에 출력. 매우높음/높음 강조.
 
-### 5-4. Jira (선택)
-Jira 토큰 있으면 FAIL → 서브태스크 자동 생성 + 스크린샷 첨부.
+### 5-4. Jira 티켓 (사용자 선택)
+FAIL이 있으면 사용자에게 묻는다: **"Jira에 티켓을 올릴까요?"**
+
+승인하면:
+```bash
+python3 scripts/jira-tickets.py \
+  --input output/reports/YYYY-MM-DD-qa-{페이지명}-results.json \
+  --jira-url https://{org}.atlassian.net \
+  --email {email} \
+  --token {token} \
+  --project {project-key} \
+  --parent {parent-issue}
+```
+
+동작:
+- FAIL TC별 서브태스크 자동 생성
+- 스크린샷 자동 첨부
+- 재현 절차 + 기대 동작 + 해상도별 재현 정보 기술
+- `--dry-run`으로 미리보기 가능
