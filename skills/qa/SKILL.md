@@ -14,13 +14,13 @@ argument-hint: "[url]"
 - `/qa` — 범용. 인풋 질문 후 전체 플로우
 - `/qa [URL]` — URL 지정하여 바로 시작
 
-**사전 조건:** Playwright MCP 연결 필요. `/mcp`에서 확인.
-
 ---
 
 ## 플로우
 
 ```
+Phase 0: 환경 체크 (이 스킬에서 직접)
+    ↓
 Phase 1: 인풋 수집 (이 스킬에서 직접)
     ↓
 Phase 2: /qa-analyze 호출 (소스 분석)
@@ -34,6 +34,78 @@ Phase 5: /qa-report 호출 (리포트 생성)
 Phase 6: 사용자에게 묻기 "Jira에 올릴까요?"
     ↓ (승인 시)
 Phase 7: /qa-jira 호출 (티켓 생성)
+```
+
+---
+
+## Phase 0: 환경 체크
+
+스킬 실행 전에 필요한 환경이 갖추어져 있는지 확인한다. 하나라도 없으면 설치 안내 후 스킬을 중단한다.
+
+### 필수 (없으면 중단)
+
+**1. Playwright MCP**
+- 확인: `mcp__playwright__browser_navigate` 도구가 사용 가능한지 확인
+- 없으면 다음을 안내하고 중단:
+  ```
+  ⚠ Playwright MCP가 연결되어 있지 않습니다.
+
+  설치 방법:
+  1. /mcp 입력
+  2. "Playwright" 검색하여 연결
+  3. 연결 완료 후 다시 /qa 실행
+
+  Playwright MCP가 없으면 브라우저 자동 검증이 불가능합니다.
+  ```
+
+**2. Python 3**
+- 확인: `python3 --version` 실행
+- 없으면 안내하고 중단:
+  ```
+  ⚠ Python 3이 설치되어 있지 않습니다.
+
+  설치 방법:
+  - macOS: brew install python3
+  - 기타: https://www.python.org/downloads/
+
+  Python은 리포트 생성(엑셀)과 Jira 연동에 필요합니다.
+  ```
+
+**3. openpyxl (Python 패키지)**
+- 확인: `python3 -c "import openpyxl"` 실행
+- 없으면 안내:
+  ```
+  ⚠ openpyxl 패키지가 없습니다. 엑셀 리포트 생성에 필요합니다.
+
+  설치:
+  pip3 install openpyxl
+
+  설치 후 다시 /qa 실행해주세요.
+  ```
+
+### 선택 (없으면 안내 후 계속 진행)
+
+**4. Notion MCP**
+- 확인: `mcp__claude_ai_Notion__notion-fetch` 도구가 사용 가능한지 확인
+- 없으면 안내하되 **계속 진행**:
+  ```
+  ℹ Notion MCP가 연결되어 있지 않습니다.
+  PRD를 Notion URL로 제공하려면 /mcp에서 Notion을 연결해주세요.
+  대신 로컬 md 파일이나 대화에서 직접 입력으로 PRD를 제공할 수 있습니다.
+  ```
+
+**5. Jira API 접속**
+- Phase 0에서는 체크하지 않음 — Phase 6(Jira 올릴까요?)에서 필요할 때 물어봄
+
+### 환경 체크 통과 시
+```
+✅ 환경 체크 완료
+  - Playwright MCP: 연결됨
+  - Python 3: 설치됨 (3.x.x)
+  - openpyxl: 설치됨
+  - Notion MCP: 연결됨 / 미연결 (PRD 직접 입력 가능)
+
+QA 자동화를 시작합니다.
 ```
 
 ---
