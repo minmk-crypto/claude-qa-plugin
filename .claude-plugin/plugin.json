@@ -1,0 +1,8 @@
+{
+  "name": "qa-automation",
+  "description": "Web QA Automation — Figma/PRD 분석 → TC 자동 생성 → Playwright 검증 → 리포트",
+  "version": "1.0.0",
+  "author": {
+    "name": "Piyonna TF"
+  }
+}
